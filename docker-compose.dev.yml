@@ -1,0 +1,28 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      TZ: "Asia/Jakarta"
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 127.0.0.1:${EXPOSE_DB_PORT}:5432
+    volumes:
+      - ../${APP_NAME}-db:/var/lib/postgresql/data
+  app:
+    build:
+      context: ./
+      dockerfile: dev.Dockerfile
+      args:
+        CI_REGISTRY_IMAGE: ${CI_REGISTRY_IMAGE}
+    env_file:
+      - .env
+    working_dir: /var/www
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${EXPOSE_APP_PORT}:80
+    volumes:
+      - .:/var/www
